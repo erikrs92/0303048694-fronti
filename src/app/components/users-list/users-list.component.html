@@ -1,0 +1,59 @@
+<div class="list row">
+  <div class="col-md-8">
+    <div class="input-group mb-3">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Search by username"
+        [(ngModel)]="username"
+      />
+      <div class="input-group-append">
+        <button
+          class="btn btn-outline-secondary"
+          type="button"
+          (click)="searchTitle()"
+        >
+          Search
+        </button>
+      </div>
+    </div>
+  </div>
+  <hr>
+  <div class="col-md-8"  style="text-align: center;">
+     
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Usuario</th>
+          <th scope="col">Email</th>
+          <th scope="col">Estado</th> 
+        </tr>
+      </thead>
+      <tbody>
+        
+          
+        <tr *ngFor="let user of users; let i = index" 
+        (click)="setActiveuser(user, i)"
+        [class.active]="i === currentIndex">
+            <th scope="row">{{ user.id }}</th> 
+              <td>{{ user.username }}</td>
+              <td>{{ user.email }}</td>
+              <td><span   [ngClass]="user.status ? 'badge   bg-primary' : 'badge   bg-danger'" > {{ user.status ? "Habilitado" : "Deshabilitado" }}</span></td>
+              
+            
+         </tr>
+        </tbody>
+    </table>
+    
+   <!-- <button class="m-3 btn btn-sm btn-danger" (click)="removeAllusers()">
+      Remove All
+    </button>-->
+  </div>
+  <div class="col-md-4"> 
+    <app-user-details
+      [viewMode]="true"
+      [currentuser]="currentuser"
+    ></app-user-details>
+  </div>
+</div>

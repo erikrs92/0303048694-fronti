@@ -1,0 +1,99 @@
+@if (viewMode){
+  @if (currentuser.id){
+ 
+    <div class="card  mb-3"  [ngClass]="currentuser.status ? 'text-bg-primary' : 'text-bg-danger'"  style="max-width: 18rem;">
+      <div class="card-header">Detalles</div>
+      <div class="card-body">
+        <label><strong>Usuario:</strong></label> {{ currentuser.username }} <br>
+        <label><strong>Mail:</strong></label> {{ currentuser.email }} <br>
+        <label><strong>Estado:</strong></label>  {{ currentuser.status ? "Habilitado" : "Deshabilitado" }} <br>
+      </div>
+    </div>
+
+  
+
+ <!-- <a class="badge badge-warning" routerLink="/users/{{ currentuser.id }}">
+    Edit
+  </a>-->
+  <button type="button" class="btn btn-warning" (click)="editUser(currentuser.id)">
+    Editar
+  </button>
+  
+  } @else {<p>Información</p>}
+} @else {
+  @if (currentuser.id) {
+  <div class="edit-form">
+    <h5>Actualizar usuario</h5>
+    <form>
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input
+          type="text"
+          class="form-control"
+          id="username"
+          [(ngModel)]="currentuser.username"
+          name="username"
+        />
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          type="text"
+          class="form-control"
+          id="email"
+          [(ngModel)]="currentuser.email"
+          name="email"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          class="form-control"
+          id="password"
+          [(ngModel)]="currentuser.password"
+          name="password"
+        />
+      </div>
+<br>
+      <div class="form-check form-switch">
+        <input 
+          class="form-check-input" 
+          type="checkbox" 
+          id="status" 
+          [(ngModel)]="currentuser.status" 
+          name="status">
+        <label class="form-check-label" for="status">¿Habilitado?</label>
+        <br><br>
+      </div>
+      
+
+     
+    </form>
+
+    @if (currentuser.status) {
+    <button class="btn btn-secondary  "
+      (click)="updatePublished(false)" >
+      Desactivar 
+    </button>&nbsp;&nbsp;
+    } @else {
+    <button class="btn btn-primary" (click)="updatePublished(true)">
+      Activar
+    </button>&nbsp;&nbsp;
+    }
+
+    <button class="btn btn-danger" (click)="deleteuser()">
+      Delete
+    </button>&nbsp;&nbsp;
+
+    <button
+      type="submit"
+      class="btn btn-success"
+      (click)="updateuser()">
+      Update
+    </button>
+    <p>{{ message }}</p>
+  </div>
+  } @else {<p>Cannot access this user...</p>}
+}
