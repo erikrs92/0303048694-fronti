@@ -12,5 +12,5 @@ deploy_ec2:
     - echo "Decodificando la clave privada"
     - echo "$SSH_PRIVATE_KEY_BASE64" | base64 --decode > /tmp/your-key.pem
     - chmod 600 /tmp/your-key.pem
-    - echo "Conectándose al servidor EC2"
-    - ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ec2-user@your-ec2-public-ip 'echo "Conexión exitosa"'
+    - echo "Conectándose al servidor EC2" 
+    - ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ${EC2_USER_AWS}@${IP_SERVER_BASE} 'echo "Conexión exitosa"'
