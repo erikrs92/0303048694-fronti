@@ -1,0 +1,16 @@
+image: ubuntu:latest
+
+stages:
+  - deploy
+
+before_script:
+  - apt-get update && apt-get install -y openssh-client
+
+deploy_ec2:
+  stage: deploy
+  script:
+    - echo "Decodificando la clave privada"
+    - echo "$SSH_PRIVATE_KEY_BASE64" | base64 --decode > /tmp/your-key.pem
+    - chmod 600 /tmp/your-key.pem
+    - echo "Conectándose al servidor EC2"
+    - ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ec2-user@your-ec2-public-ip 'echo "Conexión exitosa"'
