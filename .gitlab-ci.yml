@@ -13,5 +13,5 @@ deploy_ec2:
     - echo "$SSH_PRIVATE_KEY_BASE64" | base64 --decode > /tmp/your-key.pem
     - chmod 600 /tmp/your-key.pem
     - echo "Conectándose al servidor EC2" 
-    - ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ${EC2_USER_AWS}@${IP_SERVER_BASE} 'echo "Conexión exitosa"'
-    - ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ${EC2_USER_AWS}@${IP_SERVER_BASE} 'docker ps'
+    - ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ${EC2_USER_AWS}@${EC2_IP_SERVERFRONT} 'echo "Conexión exitosa"'
+    - ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ${EC2_USER_AWS}@${EC2_IP_SERVERFRONT} 'docker ps'
