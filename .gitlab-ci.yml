@@ -72,15 +72,16 @@ Build:
 
 TestingApp:
     stage: test
-    image: node:20-alpine
+    image: node:20.15
     variables:
         BRANCH_RELEASE: release     
     before_script:
         - echo $RELEASE_CANDIDATE 
-        - apk add --no-cache git wget gnupg
-        - wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor | tee /etc/apk/keys/google-linux-signing.gpg
-        - echo 'http://dl-cdn.alpinelinux.org/alpine/edge/community' >> /etc/apk/repositories
-        - apk add --no-cache gnupg  google-chrome-stable         
+        - apt-get install git wget gnupg
+        - wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+        - sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+        - apt update
+        - apt install -y google-chrome-stable
     script: 
         - npm install -g @angular/cli
         - npm install karma --save-dev
