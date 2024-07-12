@@ -74,6 +74,13 @@ TestingApp:
     image: node:20-alpine
     variables:
         BRANCH_RELEASE: release     
+    before_script:
+        - echo $RELEASE_CANDIDATE 
+        - apk add --no-cache git wget gnupg 
+        - apt install -y wget gnupg
+        - wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+        - sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+        - apt install -y google-chrome-stable
     script: 
         - npm install -g @angular/cli
         - npm install karma --save-dev
@@ -88,29 +95,4 @@ TestingApp:
       - prepare
     rules:
         - if: '$CI_COMMIT_BRANCH == "release" && $AMBIENTE == "QA"'
-
  
-stagging:
-    stage: release
-    image: alpine:latest
-    before_script:
-        - echo $RELEASE_CANDIDATE 
-        - apk add --no-cache git
-        - git config user.email '$GITLAB_USER_EMAIL'
-        - git config user.name '$GITLAB_USER_LOGIN'
-        - git config --global http.sslVerify "false"
-    script:
-        - git remote set-url origin "https://$GITLAB_USER_LOGIN:$GITLAB_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_PATH.git"
-        - git tag -a ${RELEASE_CANDIDATE} -m "Version creado desde CICD"
-        - git push origin ${RELEASE_CANDIDATE}
-    after_script: 
-        - echo "RELEASE_CANDIDATE=${RELEASE_CANDIDATE}" > stagging.env
-        - echo "VERSION=${VERSION}" >> stagging.env
-    artifacts:
-      reports:
-        dotenv: stagging.env
-    needs:
-      - TestingApp
-      - Build       
-    rules:
-        - if: '$CI_COMMIT_BRANCH == "release" && $AMBIENTE == "QA"'
