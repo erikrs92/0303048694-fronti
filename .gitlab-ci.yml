@@ -5,7 +5,13 @@ stages:
 
 before_script:
   - apt-get update && apt-get install -y openssh-client
-
+variables:
+#      GIT_STRATEGY: none
+      PEMFILE: /tmp/your-key.pem
+      IMAGE: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:$VERSION-QA
+      SPRING_DATASOURCE_URL: ${DB_URL_QA} 
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME_QA} 
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD_QA} 
 deploy_ec2:
   stage: deploy
   script:
@@ -14,5 +20,5 @@ deploy_ec2:
     - chmod 600 /tmp/your-key.pem
     - cat /tmp/your-key.pem
     - echo "Conectándose al servidor EC2" 
-    - ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ${EC2_USER_AWS}@${EC2_IP_SERVERFRONT} 'echo "Conexión exitosa"'
+    - ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ${EC2_USER_AWS}@${EC2_IP_SERVERFRONT} 'echo "Conexión exitosa $SPRING_DATASOURCE_URL  -  ${DB_URL_QA}"'
     - ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ${EC2_USER_AWS}@${EC2_IP_SERVERFRONT} 'docker ps'
