@@ -25,8 +25,8 @@ deploy_ec2:
     - ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ${EC2_USER_AWS}@${EC2_IP_SERVERFRONT} "
       bash -c '
       echo $EC2_IP_SERVERFRONT \
-      echo $SPRING_DATASOURCE_URL \
-      echo $SPRING_DATASOURCE_USERNAME
+      echo $DB_URL_QA \
+      echo $DB_USERNAME_QA
       
       '      
       "
