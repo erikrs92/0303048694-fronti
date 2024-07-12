@@ -73,7 +73,7 @@ Build:
       - build.zip
     expire_in: 10 min
     reports:
-            dotenv: build.env
+      dotenv: build.env
   needs:
     - prepare
   rules:      
@@ -99,9 +99,9 @@ TestingApp:
         - npm install karma-coverage-istanbul-reporter  --save-dev
         - ng test --karma-config=karma.conf.js --watch=false --browsers=ChromeHeadlessNoSandbox --code-coverage
     artifacts: 
-        reports:
-            junit:
-                - test-results/junit.xml 
+      reports:
+        junit:
+          - test-results/junit.xml 
     needs:
       - prepare
     rules:
