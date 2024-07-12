@@ -23,8 +23,7 @@ deploy_ec2:
     - echo "Conectándose al servidor EC2" 
     - echo "Server Host-${EC2_IP_SERVERFRONT}"
     - ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ${EC2_USER_AWS}@${EC2_IP_SERVERFRONT} "
-        bash -c '
-        echo $EC2_IP_SERVERFRONT && echo $DB_URL_QA &&  echo $DB_USERNAME_QA      
-        '      
+        bash -c 'echo $EC2_IP_SERVERFRONT'
+        bash -c 'echo $DB_URL_QA'  
       "
     - ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ${EC2_USER_AWS}@${EC2_IP_SERVERFRONT} 'docker ps'
