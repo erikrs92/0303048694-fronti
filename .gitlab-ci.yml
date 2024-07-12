@@ -1,29 +1,135 @@
-image: ubuntu:latest
+variables:
+  AMBIENTE:
+    value: "QA"
+    options:
+      - "Produccion"
+      - "QA"
+    description: "Seleccionar que ambiente requieres desplegar, por defecto en qa"
+  RELEASE_CANDIDATE:
+    description: "Ingresar que versión se debe desplegar en producción, solo es necesario si el valor de AMBIENTE es 'Produccion'"
+
+cache:
+  key: "$CI_COMMIT_REF_SLUG"
+  paths:
+    - .m2/repository
+
 
 stages:
-  - deploy
+    - setup
+    - build
+    - test
+    - analitycs
+    - release
+    - delivery
+    - deploy
 
-before_script:
-  - apt-get update && apt-get install -y openssh-client
-variables:
-#      GIT_STRATEGY: none
-      PEMFILE: /tmp/your-key.pem
-      IMAGE: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:$VERSION-QA
-      SPRING_DATASOURCE_URL: ${DB_URL_QA} 
-      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME_QA} 
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD_QA} 
-deploy_ec2:
-  stage: deploy
+#include:
+#   - template: Jobs/Code-Quality.gitlab-ci.yml
+#  - template: Jobs/Dependency-Scanning.gitlab-ci.yml
+#  - template: Jobs/SAST.gitlab-ci.yml
+#  - template: Jobs/Secret-Detection.gitlab-ci.yml
+#  - template: Jobs/Build.gitlab-ci.yml
+#  - template: Jobs/Container-Scanning.gitlab-ci.yml
+
+prepare:
+    stage: setup
+    image: alpine:latest
+    script:
+        - printenv | sort 
+        - echo "CURRENT_DATE=$(date +%Y%m%d%H%M%S)" > setup.env
+        - cat setup.env
+    artifacts:
+        reports:
+            dotenv: setup.env
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "release" && $AMBIENTE == "QA"'
+#          when: manual
+#        - when: never
+
+
+
+Build:
+  stage: Build
+  image: node:20-alpine
+  variables:  
+        BRANCH_RELEASE: release 
+  before_script:
+    - apk add --no-cache curl git zip jq    
   script:
-    - echo "Decodificando la clave privada"
-    - echo "$EC2_SSH_PRIVATE_KEY_BASE64" | base64 --decode > /tmp/your-key.pem
-    - chmod 600 /tmp/your-key.pem
-    - cat /tmp/your-key.pem
-    - printenv
-    - echo "Conectándose al servidor EC2" 
-    - echo "Server Host-${EC2_IP_SERVERFRONT}"
-    - ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ${EC2_USER_AWS}@${EC2_IP_SERVERFRONT} "
-        bash -c 'echo Servercito $EC2_IP_SERVERFRONT' && 
-        bash -c 'echo Servercito2 $EC2_IP_SERVERBACK'  
-      "
-    - ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ${EC2_USER_AWS}@${EC2_IP_SERVERFRONT} 'docker ps'
+    # Lllama secure files_   
+    - npm cache clean --force    
+    - npm install   
+    - ng build
+    - zip -r build.zip dist
+  artifacts:
+    paths:
+      - qa.zip
+    expire_in: 10 min
+  rules:      
+      - if: '$CI_PIPELINE_SOURCE != "push" && $ENVIRONMENT == "QA" && $TICKET != ""'
+
+
+TestingApp:
+    stage: test
+    image: node:20-alpine
+    variables:
+        BRANCH_RELEASE: release     
+    script: 
+        - npm install -g @angular/cli
+        - npm install karma --save-dev
+        - npm install karma-junit-reporter --save-dev
+        - npm install karma-coverage-istanbul-reporter  --save-dev
+        - ng test --karma-config=karma.conf.js --watch=false --browsers=ChromeHeadless --code-coverage 
+    artifacts: 
+        reports:
+            junit:
+                - test-results/junit.xml 
+    needs:
+      - prepare
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "release" && $AMBIENTE == "QA"'
+
+ 
+stagging:
+    stage: release
+    image: alpine:latest
+    before_script:
+        - echo $RELEASE_CANDIDATE 
+        - apk add --no-cache git
+        - git config user.email '$GITLAB_USER_EMAIL'
+        - git config user.name '$GITLAB_USER_LOGIN'
+        - git config --global http.sslVerify "false"
+    script:
+        - git remote set-url origin "https://$GITLAB_USER_LOGIN:$GITLAB_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_PATH.git"
+        - git tag -a ${RELEASE_CANDIDATE} -m "Version creado desde CICD"
+        - git push origin ${RELEASE_CANDIDATE}
+    after_script: 
+        - echo "RELEASE_CANDIDATE=${RELEASE_CANDIDATE}" > stagging.env
+        - echo "VERSION=${VERSION}" >> stagging.env
+    artifacts:
+      reports:
+        dotenv: stagging.env
+    needs:
+      - TestingApp        
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "release" && $AMBIENTE == "QA"'
+
+PackageBack:
+    stage: release
+    image: maven:3.8.5-openjdk-17-slim
+    variables:
+        MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"  
+    script:
+        - mvn clean package  -DskipTests
+    after_script: 
+        - echo "VERSION=${VERSION}" > VersionApp.env
+        - cat VersionApp.env
+    artifacts:
+        reports:
+            dotenv: VersionApp.env
+        paths:
+            - target/*.jar
+    needs:
+      - stagging
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "release" && $AMBIENTE == "QA"'
