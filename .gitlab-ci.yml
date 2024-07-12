@@ -127,7 +127,8 @@ stagging:
       reports:
         dotenv: stagging.env
     needs:
-      - TestingApp        
+      - TestingApp
+      - Build 
     rules:
         - if: '$CI_COMMIT_BRANCH == "release" && $AMBIENTE == "QA"'
 
