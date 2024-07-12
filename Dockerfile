@@ -1,21 +1,7 @@
-# Fase de compilación
-FROM node:20.12-alpine as build-step
+FROM nginx:latest  
 
-WORKDIR /app
+COPY dist/frontiweb/browser /usr/share/nginx/html
 
-COPY package.json .
-
-RUN npm install
-
-COPY . .
-
-RUN npm run build --prod
-
-# Fase de producción
-FROM nginx:alpine
-
-COPY --from=build-step /app/dist/frontiweb /usr/share/nginx/html
-
+# Exposing a port, here it means that inside the container, the app will be using Port 80 while running
 EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+ 
