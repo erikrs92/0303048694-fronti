@@ -29,7 +29,13 @@ module.exports = function (config) {
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: false, // Observa archivos y ejecuta pruebas en cambios
-    browsers: ['FirefoxHeadless'], //ChromeHeadless.  Puedes añadir 'PhantomJS' si aún lo utilizas
+    customLaunchers: {
+      ChromeHeadlessNoSandbox: {
+        base: 'ChromeHeadless',
+        flags: ['--no-sandbox', '--disable-gpu']
+      }
+    },
+    browsers: ['ChromeHeadlessNoSandbox',], //ChromeHeadless.  Puedes añadir 'PhantomJS' si aún lo utilizas
     flags: ['--no-sandbox','--disable-setuid-sandbox', '--disable-gpu', '--disable-translate', '--disable-extensions'],
     singleRun: true, // Ejecuta pruebas una sola vez si se configura a true
     concurrency: Infinity, // Permite una cantidad infinita de instancias de navegador

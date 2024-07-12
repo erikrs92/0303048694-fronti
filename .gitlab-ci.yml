@@ -89,7 +89,7 @@ TestingApp:
         - npm install karma --save-dev
         - npm install karma-junit-reporter --save-dev
         - npm install karma-coverage-istanbul-reporter  --save-dev
-        - ng test --karma-config=karma.conf.js --watch=false --browsers=ChromeHeadless --code-coverage 
+        - ng test --karma-config=karma.conf.js --watch=false --browsers=ChromeHeadlessNoSandbox --code-coverage
     artifacts: 
         reports:
             junit:
