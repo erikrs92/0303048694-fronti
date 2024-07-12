@@ -20,5 +20,5 @@ deploy_ec2:
     - chmod 600 /tmp/your-key.pem
     - cat /tmp/your-key.pem
     - echo "Conectándose al servidor EC2" 
-    - ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ${EC2_USER_AWS}@${EC2_IP_SERVERFRONT} 'echo "Conexión exitosa $SPRING_DATASOURCE_URL  -  ${DB_URL_QA}"'
+    - ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ${EC2_USER_AWS}@${EC2_IP_SERVERFRONT} 'echo "Conexión exitosa \$SPRING_DATASOURCE_URL  -  \${DB_URL_QA}"'
     - ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ${EC2_USER_AWS}@${EC2_IP_SERVERFRONT} 'docker ps'
