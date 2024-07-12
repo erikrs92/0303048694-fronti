@@ -62,6 +62,8 @@ Build:
     - npm install -g @angular/cli
     - ng build
     - zip -r build.zip dist
+    - pwd
+    - ls -li
   artifacts:
     paths:
       - qa.zip
