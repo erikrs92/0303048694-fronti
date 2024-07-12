@@ -49,7 +49,7 @@ prepare:
 
 
 Build:
-  stage: Build
+  stage: build
   image: node:20-alpine
   variables:  
         BRANCH_RELEASE: release 
