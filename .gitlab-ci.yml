@@ -66,7 +66,7 @@ Build:
       - qa.zip
     expire_in: 10 min
   rules:      
-      - if: '$CI_PIPELINE_SOURCE != "push" && $ENVIRONMENT == "QA" && $TICKET != ""'
+      - if: '$CI_PIPELINE_SOURCE != "push" && $ENVIRONMENT == "QA"'
 
 
 TestingApp:
@@ -110,26 +110,7 @@ stagging:
       reports:
         dotenv: stagging.env
     needs:
-      - TestingApp        
-    rules:
-        - if: '$CI_COMMIT_BRANCH == "release" && $AMBIENTE == "QA"'
-
-PackageBack:
-    stage: release
-    image: maven:3.8.5-openjdk-17-slim
-    variables:
-        MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"  
-    script:
-        - mvn clean package  -DskipTests
-    after_script: 
-        - echo "VERSION=${VERSION}" > VersionApp.env
-        - cat VersionApp.env
-    artifacts:
-        reports:
-            dotenv: VersionApp.env
-        paths:
-            - target/*.jar
-    needs:
-      - stagging
+      - TestingApp
+      - Build       
     rules:
         - if: '$CI_COMMIT_BRANCH == "release" && $AMBIENTE == "QA"'
