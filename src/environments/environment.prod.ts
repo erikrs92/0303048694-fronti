@@ -1,5 +1,5 @@
 export const environment = {
     production: true,
-    apiBaseUrl: 'http://devops.net.pe:8090/backi/api/v1'
+    apiBaseUrl: 'http://13.58.212.82/backi/api/v1'
   };
   
