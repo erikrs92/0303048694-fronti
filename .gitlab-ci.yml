@@ -72,6 +72,8 @@ Build:
     paths:
       - build.zip
     expire_in: 10 min
+    reports:
+            dotenv: build.env
   needs:
     - prepare
   rules:      
