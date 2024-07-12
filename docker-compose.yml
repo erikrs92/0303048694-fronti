@@ -1,0 +1,8 @@
+services:
+  backi-api:
+    image: "${IMAGE}"  # Utiliza una variable para la imagen que se llenará desde el entorno de CI
+    ports:
+      - "80:80" 
+    restart: unless-stopped
+#    environment:
+#      - SOME_ENV_VAR=some_value  # Ejemplo de cómo pasar variables de entorno
