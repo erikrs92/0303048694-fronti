@@ -22,5 +22,5 @@ deploy_ec2:
     - printenv
     - echo "Conectándose al servidor EC2" 
     - echo "Server Host-${EC2_IP_SERVERFRONT}"
-    - ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ${EC2_USER_AWS}@${EC2_IP_SERVERFRONT} 'echo "env EC2_IP_SERVERFRONT_=${EC2_IP_SERVERFRONT} Conexión exitosa Server remoto-- ${EC2_IP_SERVERFRONT} \$SPRING_DATASOURCE_URL  -  \${DB_URL_QA}"'
+    - ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ${EC2_USER_AWS}@${EC2_IP_SERVERFRONT} "env EC2_IP_SERVERFRONT_=${EC2_IP_SERVERFRONT} bash -c 'echo $EC2_IP_SERVERFRONT'"
     - ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ${EC2_USER_AWS}@${EC2_IP_SERVERFRONT} 'docker ps'
