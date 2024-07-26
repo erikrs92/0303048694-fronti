@@ -24,13 +24,6 @@ stages:
     - deploy
     - AutomatedQA
 
-#include:
-#   - template: Jobs/Code-Quality.gitlab-ci.yml
-#  - template: Jobs/Dependency-Scanning.gitlab-ci.yml
-#  - template: Jobs/SAST.gitlab-ci.yml
-#  - template: Jobs/Secret-Detection.gitlab-ci.yml
-#  - template: Jobs/Build.gitlab-ci.yml
-#  - template: Jobs/Container-Scanning.gitlab-ci.yml
 
 prepare:
     stage: setup
@@ -229,3 +222,11 @@ Functional TestQA:
         - deploy_qa
     rules:
         - if: '$CI_COMMIT_BRANCH == "release" && $AMBIENTE == "QA"'
+
+include:
+   - template: Jobs/Code-Quality.gitlab-ci.yml
+  - template: Jobs/Dependency-Scanning.gitlab-ci.yml
+  - template: Jobs/SAST.gitlab-ci.yml
+  - template: Jobs/Secret-Detection.gitlab-ci.yml
+  - template: Jobs/Build.gitlab-ci.yml
+  - template: Jobs/Container-Scanning.gitlab-ci.yml
