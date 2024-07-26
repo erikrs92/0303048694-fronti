@@ -1,12 +1,20 @@
 variables:
   AMBIENTE:
-    value: "QA"
+    value: "Seleccionar"
     options:
+      - "Seleccionar"
       - "Produccion"
       - "QA"
     description: "Seleccionar que ambiente requieres desplegar, por defecto en qa"
-  RELEASE_CANDIDATE:
-    description: "Ingresar que versión se debe desplegar en producción, solo es necesario si el valor de AMBIENTE es 'Produccion'"
+  QUALITY_VERIFY:
+    value: "SI"
+    options:
+      - "Seleccionar"
+      - "SI"
+      - "NO"
+    description: "Seleccionar si valida Calidad"
+  RELEASE_CANDIDATE_PROD:
+    description: "Necesario si el valor de AMBIENTE es 'Produccion'"
 
 cache:
   key: "$CI_COMMIT_REF_SLUG"
@@ -39,7 +47,38 @@ prepare:
         - if: '$CI_COMMIT_BRANCH == "release" && $AMBIENTE == "QA"'
 #          when: manual
 #        - when: never
-
+Promote:
+    stage: setup
+    variables:
+      GIT_STRATEGY: none 
+      BRANCH_SOURCE: "develop"
+      BRANCH_RELEASE: "release"
+    image: alpine:latest
+    before_script:
+      - apk add --no-cache curl jq git
+      - git config --global user.email "$GITLAB_USER_EMAIL"
+      - git config --global user.name "$GITLAB_USER_NAME"
+    script:
+      - echo "Ejecutando de Plantilla"   
+      - echo "-----------Respaldar el archivo CI release -------"
+      - >
+        curl --header "PRIVATE-TOKEN: $GITLAB_TOKEN" "$CI_API_V4_URL/projects/$CI_PROJECT_ID/repository/files/.gitlab-ci.yml/raw?ref=release" --output .gitlab-ci.yml
+      - BACK_CI_FILE=$PWD/.gitlab-ci.yml
+      - echo "----------- Reemplazar release con develop -------"
+      - git clone https://$GITLAB_USER_LOGIN:$GITLAB_TOKEN@gitlab.com/$CI_PROJECT_PATH --branch $BRANCH_SOURCE  temp_dir
+      - cd temp_dir
+      - git checkout $BRANCH_RELEASE && git pull origin $BRANCH_RELEASE #Cambiar y descargar release
+      - git fetch origin $BRANCH_SOURCE #Descarga el contenido solo en la rama develop sin afecta la rama actual.       
+      - git reset --hard origin/$BRANCH_SOURCE # Reemplazar todo el contenido de release con develop previamente descaggada con fetch
+      - rm -f .gitlab-ci.yml #Remover archivo CI de develop
+      - cp $BACK_CI_FILE . && git add .gitlab-ci.yml #Copiar archivo de CI release y agregarlo al staging.
+      - git commit --allow-empty -m "Last Execute for $CURRENT_DATE" 
+      - git push --force origin $BRANCH_RELEASE  #Push los cambios a la rama release 
+      - echo "Fin Ejecutando de Plantilla" 
+    needs:
+      - prepare
+    rules:      
+      - if: '$CI_COMMIT_BRANCH == "release" && $AMBIENTE == "QA"'
 
 
 Build:
@@ -103,7 +142,8 @@ JunitTest:
     needs:
       - prepare
     rules:
-        - if: '$CI_COMMIT_BRANCH == "release" && $AMBIENTE == "QA"'
+        #- if: '$CI_COMMIT_BRANCH == "release" && $AMBIENTE == "QA"'
+        - if: '$CI_PIPELINE_SOURCE != "push" && $CI_COMMIT_TAG !~ /^RC-/'
 
 
 sonarcloud-check:
@@ -123,8 +163,29 @@ sonarcloud-check:
   needs:
     - JunitTest
   rules:
-    - if: '$CI_COMMIT_BRANCH == "release" && $AMBIENTE == "QA"'
+    #- if: '$CI_COMMIT_BRANCH == "release" && $AMBIENTE == "QA"'
+    - if: '$CI_PIPELINE_SOURCE != "push" && $CI_COMMIT_TAG !~ /^RC-/' 
 
+quality-gate:
+  stage: analitycs
+  image:
+    name: alpine:latest
+    entrypoint: [""]
+  needs:
+    - sonarcloud-check
+  script:
+    - apk add --no-cache curl jq
+    - |
+      status=$(curl -s -u $SONAR_TOKEN: "https://sonarcloud.io/api/qualitygates/project_status?projectKey=devops-net_fronti" | jq -r '.projectStatus.status')
+      if [ "$status" != "OK" ]; then
+        echo "Quality gate failed: $status"
+        exit 1
+      else
+        echo "Quality gate passed"
+      fi
+  allow_failure: false
+  rules:
+    - if: '$CI_PIPELINE_SOURCE != "push" && $QUALITY_VERIFY == "SI" && $CI_COMMIT_TAG !~ /^RC-/' 
 
 stagging:
     stage: release
@@ -137,6 +198,9 @@ stagging:
         - git config --global http.sslVerify "false"
     script:
         - git remote set-url origin "https://$GITLAB_USER_LOGIN:$GITLAB_TOKEN@$CI_SERVER_HOST/$CI_PROJECT_PATH.git"
+        - git fetch --all
+        - git checkout release
+        - git pull origin release
         - git tag -a ${RELEASE_CANDIDATE} -m "Version creado desde CICD"
         - git push origin ${RELEASE_CANDIDATE}
     after_script: 
@@ -227,8 +291,16 @@ Functional TestQA:
     rules:
         - if: '$CI_COMMIT_BRANCH == "release" && $AMBIENTE == "QA"'
 
+secret_detection:
+    stage: test 
+    rules:
+      - if: '$CI_PIPELINE_SOURCE != "push" && $CI_COMMIT_TAG !~ /^RC-/' 
+semgrep-sast:
+    stage: test 
+    rules:
+      - if: '$CI_PIPELINE_SOURCE != "push" && $CI_COMMIT_TAG !~ /^RC-/' 
 include:
-#  - template: Jobs/Code-Quality.gitlab-ci.yml
+  #- template: Jobs/Code-Quality.gitlab-ci.yml
   - template: Jobs/Dependency-Scanning.gitlab-ci.yml
   - template: Jobs/SAST.gitlab-ci.yml
   - template: Jobs/Secret-Detection.gitlab-ci.yml
