@@ -263,7 +263,7 @@ deploy_qa:
         - publish_image
     environment:
         name: QA Environment
-        url: http://192.168.1.94/
+        url: http://${SRVDEPLOY}
 
 
 Functional TestQA:
