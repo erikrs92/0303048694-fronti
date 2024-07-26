@@ -217,6 +217,8 @@ Functional TestQA:
         BRANCH_RELEASE: release
     script:
       - echo $RELEASE_CANDIDATE
+      - pwd-
+      - hostname -I
       - npm install cypress --save-dev
       - npx cypress run
       #- rm -fR ./* 
