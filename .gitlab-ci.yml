@@ -199,7 +199,7 @@ deploy_qa:
         - publish_image
     environment:
         name: QA Environment
-        url: http://${SRVDEPLOY}/backi/api/v1/ 
+        url: http://${SRVDEPLOY}
 
 
 Functional TestQA:
