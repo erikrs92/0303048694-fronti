@@ -4,7 +4,7 @@ describe('Verificar usuario deshabilitado', () => {
   before(() => {
     // Visita la página que contiene la tabla
     cy.visit('http://192.168.1.94/users');
-
+    cy.screenshot('CASO025_1_Antes_Actualizar');
     // Selecciona todos los elementos <tr> dentro de la tabla y cuenta su cantidad
     cy.get('table tbody tr').its('length').then((cantidad) => {
       cantidadRegistros = cantidad;
@@ -20,6 +20,7 @@ describe('Verificar usuario deshabilitado', () => {
 
     // Escribe 'testuser' en el campo de búsqueda
     cy.get('input[placeholder="Search by username"]').type(`${ultimoID}`);
+    cy.screenshot('CASO025_2_EvidenciaFiltrar');
 
     // Haz clic en el botón de búsqueda
     cy.get('button').contains('Search').click();
@@ -27,6 +28,7 @@ describe('Verificar usuario deshabilitado', () => {
     // Espera a que los resultados de la búsqueda se muestren y verifica que al menos un resultado contiene 'S900000008'
     cy.get('table').contains('td', `${ultimoID}`).should('be.visible');
     cy.wait(1000);
+    cy.screenshot('CASO025_3_EvidenciaFiltrado');
     // Opcional: Verifica otros detalles del usuario encontrado como el email o estado, asumiendo que los datos de 'testuser' son conocidos
     cy.get('table').within(() => {
       cy.contains('td', 'automated@canvia.com').should('be.visible');
@@ -35,7 +37,7 @@ describe('Verificar usuario deshabilitado', () => {
 
     // Espera a que la tabla esté presente en la página
     cy.get('table').should('be.visible');
-
+    
     // Obtén todas las filas de la tabla
     cy.get('table tbody tr').first().click();
  
@@ -48,19 +50,21 @@ describe('Verificar usuario deshabilitado', () => {
     // Cambiar el valor del estado (status) a habilitado (si está deshabilitado)
     cy.get('#status').then(($statusCheckbox) => {
       if ($statusCheckbox.is(':checked')) {
-        cy.get('#status').uncheck(); // Si está habilitado, deshabilitarlo
+        cy.get('#status').uncheck(); // Si está habilitado, deshabilitarlo        
       } else {
         cy.get('#status').check(); // Si está deshabilitado, habilitarlo
       }
     });
-
+    
     // Hacer clic en el botón "Update"
     cy.contains('button', 'Update').click();
 
      // Esperar a que la actualización se complete (puedes ajustar el tiempo según sea necesario)
      cy.wait(5000);
+     cy.screenshot('CASO025_4_EvidenciaCambioEstado');
 
      cy.visit('http://192.168.1.94/users');
+     cy.screenshot('CASO025_5_finflujo');
     
   });
 });

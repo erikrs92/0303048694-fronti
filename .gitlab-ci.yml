@@ -98,6 +98,8 @@ TestingApp:
         - npm install karma-junit-reporter --save-dev
         - npm install karma-coverage-istanbul-reporter  --save-dev
         - ng test --karma-config=karma.conf.js --watch=false --browsers=ChromeHeadlessNoSandbox --code-coverage
+        - npm install cypress --save-dev
+
     artifacts: 
       reports:
         junit:
@@ -179,3 +181,28 @@ deploy_qa:
     environment:
         name: QA Environment
         url: http://${SRVDEPLOY}/backi/api/v1/ 
+
+
+Cunctional_Testing:
+    stage: test
+    image: node:20.15
+    variables:
+        BRANCH_RELEASE: release     
+    before_script:
+        - echo $RELEASE_CANDIDATE 
+        - apt-get install git wget gnupg
+        - wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
+        - sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
+        - apt update
+        - apt install -y google-chrome-stable
+    script: 
+        - npm install cypress --save-dev
+        - npx cypress run
+    artifacts: 
+      reports:
+        junit:
+          - cypress/evidences/*
+    needs:
+      - deploy_qa
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "release" && $AMBIENTE == "QA"'
