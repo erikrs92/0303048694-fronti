@@ -3,7 +3,7 @@ describe('Registro de usuario con status false', () => {
   
   before(() => {
     // Visita la página que contiene la tabla
-    cy.visit('http://localhost:4200/users');
+    cy.visit('http://192.168.1.94/users');
 
     // Selecciona todos los elementos <tr> dentro de la tabla y cuenta su cantidad
     cy.get('table tbody tr').its('length').then((cantidad) => {
@@ -16,7 +16,7 @@ describe('Registro de usuario con status false', () => {
 
 
     // Visitar la página de registro de usuario
-    cy.visit('http://localhost:4200/add');
+    cy.visit('http://192.168.1.94/add');
 
     
     // Llenar el formulario de registro con los datos del usuario
@@ -32,8 +32,8 @@ describe('Registro de usuario con status false', () => {
     // Esperar a que aparezca el mensaje de éxito "Agregado correctamente!"
     cy.contains('Agregado correctamente!').should('be.visible');
     cy.wait(1000);
-    // Volver a la lista de usuarios en http://localhost:4200/users
-    cy.visit('http://localhost:4200/users');
+    // Volver a la lista de usuarios en http://192.168.1.94/users
+    cy.visit('http://192.168.1.94/users');
 
     // Verificar que el nuevo usuario esté en la lista
     cy.get('table tbody').contains(`${proximoID}`).should('be.visible');

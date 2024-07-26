@@ -3,7 +3,7 @@ describe('Verificar usuario deshabilitado', () => {
   
   before(() => {
     // Visita la página que contiene la tabla
-    cy.visit('http://localhost:4200/users');
+    cy.visit('http://192.168.1.94/users');
 
     // Selecciona todos los elementos <tr> dentro de la tabla y cuenta su cantidad
     cy.get('table tbody tr').its('length').then((cantidad) => {
@@ -15,8 +15,8 @@ describe('Verificar usuario deshabilitado', () => {
   it('Buscar usuario deshabilitado', () => {
 
     let ultimoID=`AUTO_S9000000${cantidadRegistros}`;
-    // Asumiendo que tu app corre en localhost:4200 y 'users' es el path donde se encuentra este formulario
-    cy.visit('http://localhost:4200/users');
+    // Asumiendo que tu app corre en 192.168.1.94 y 'users' es el path donde se encuentra este formulario
+    cy.visit('http://192.168.1.94/users');
 
     // Escribe 'testuser' en el campo de búsqueda
     cy.get('input[placeholder="Search by username"]').type(`${ultimoID}`);
@@ -60,7 +60,7 @@ describe('Verificar usuario deshabilitado', () => {
      // Esperar a que la actualización se complete (puedes ajustar el tiempo según sea necesario)
      cy.wait(5000);
 
-     cy.visit('http://localhost:4200/users');
+     cy.visit('http://192.168.1.94/users');
     
   });
 });
