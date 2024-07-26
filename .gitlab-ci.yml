@@ -102,9 +102,12 @@ JunitTest:
         - npm install cypress --save-dev
 
     artifacts: 
+      paths:
+        - coverage/
+        - test-results/
       reports:
         junit:
-          - test-results/junit.xml 
+          - test-results/junit.xml
     needs:
       - prepare
     rules:
