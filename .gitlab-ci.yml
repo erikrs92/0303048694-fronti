@@ -224,7 +224,7 @@ Functional TestQA:
         - if: '$CI_COMMIT_BRANCH == "release" && $AMBIENTE == "QA"'
 
 include:
-   - template: Jobs/Code-Quality.gitlab-ci.yml
+  - template: Jobs/Code-Quality.gitlab-ci.yml
   - template: Jobs/Dependency-Scanning.gitlab-ci.yml
   - template: Jobs/SAST.gitlab-ci.yml
   - template: Jobs/Secret-Detection.gitlab-ci.yml
