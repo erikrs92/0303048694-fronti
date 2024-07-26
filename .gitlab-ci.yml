@@ -212,6 +212,9 @@ Functional TestQA:
       - echo $RELEASE_CANDIDATE
       - pwd
       - hostname -I
+      - export NVM_DIR="$HOME/.nvm"
+      - [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+      - nvm use v20.16.0
       - npm install cypress --save-dev
       - npx cypress run
       #- rm -fR ./* 
