@@ -173,7 +173,7 @@ deploy_qa:
       - docker ps
       - rm -fR ./*
     rules:
-        - if: '$CI_COMMIT_BRANCH == "main" && $AMBIENTE == "QA"'
+        - if: '$CI_COMMIT_BRANCH == "release" && $AMBIENTE == "QA"'
     needs:
         - publish_image
     environment:
