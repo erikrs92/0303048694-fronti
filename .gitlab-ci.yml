@@ -228,5 +228,5 @@ include:
   - template: Jobs/Dependency-Scanning.gitlab-ci.yml
   - template: Jobs/SAST.gitlab-ci.yml
   - template: Jobs/Secret-Detection.gitlab-ci.yml
-  - template: Jobs/Build.gitlab-ci.yml
+#  - template: Jobs/Build.gitlab-ci.yml
   - template: Jobs/Container-Scanning.gitlab-ci.yml
