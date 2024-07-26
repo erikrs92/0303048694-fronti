@@ -158,34 +158,24 @@ publish_image:
 
 deploy_qa:
     stage: deploy
-    image: ubuntu:latest
-    variables:
-#      GIT_STRATEGY: none
-      PEMFILE: /tmp/your-key.pem
+    tags: 
+      - srv04 
+    variables:  
       IMAGE: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG:$VERSION-QA
-      SPRING_DATASOURCE_URL: ${DB_URL_QA} 
-      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME_QA} 
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD_QA} 
     before_script:
-      - apt-get update && apt-get install -y openssh-client
-      - echo "Decodificando la clave privada"
-      - echo "$EC2_SSH_PRIVATE_KEY_BASE64" | base64 --decode > ${PEMFILE}
-      - chmod 600 ${PEMFILE}
-      - echo "Conectándose al servidor EC2" 
-      - ssh -o StrictHostKeyChecking=no -i ${PEMFILE} ${EC2_USER_AWS}@${EC2_IP_SERVERFRONT} 'echo "Conexión exitosa"'
-    script:  
-      - scp -o StrictHostKeyChecking=no -i /tmp/your-key.pem docker-compose.yml ${EC2_USER_AWS}@${EC2_IP_SERVERFRONT}:~/docker-compose.yml 
-      - ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ${EC2_USER_AWS}@${EC2_IP_SERVERFRONT} "echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY"
-      - ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ${EC2_USER_AWS}@${EC2_IP_SERVERFRONT} "echo VARS=DEPLOY > ~/front.env" 
-      - ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ${EC2_USER_AWS}@${EC2_IP_SERVERFRONT} "echo IMAGE=$IMAGE >> ~/front.env"
-      - ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ${EC2_USER_AWS}@${EC2_IP_SERVERFRONT} "docker compose  --env-file ~/front.env pull"
-      - ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ${EC2_USER_AWS}@${EC2_IP_SERVERFRONT} "docker compose  --env-file ~/front.env up -d" 
-      - ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ${EC2_USER_AWS}@${EC2_IP_SERVERFRONT} "docker ps"
-      - ssh -o StrictHostKeyChecking=no -i /tmp/your-key.pem ${EC2_USER_AWS}@${EC2_IP_SERVERFRONT} "rm -fR ~/*" 
+      - echo hostnamectl
+    script:   
+      - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+      - echo "VARS=DEPLOY" > $CI_PIPELINE_ID.env
+      - echo "IMAGE=$IMAGE" >> $CI_PIPELINE_ID.env
+      - docker compose  --env-file $CI_PIPELINE_ID.env pull
+      - docker compose  --env-file $CI_PIPELINE_ID.env up -d
+      - docker ps
+      - rm -fR ./*
     rules:
-        - if: '$CI_COMMIT_BRANCH == "release" && $AMBIENTE == "QA"'
+        - if: '$CI_COMMIT_BRANCH == "main" && $AMBIENTE == "QA"'
     needs:
         - publish_image
     environment:
         name: QA Environment
-        url: http://${EC2_IP_SERVERFRONT}
+        url: http://${SRVDEPLOY}/backi/api/v1/ 
